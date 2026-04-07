@@ -1,0 +1,21 @@
+---
+description: Bind AI-assisted development to the repo agent workflow and guardrails
+alwaysApply: true
+---
+
+# Development lifecycle (this repo)
+
+For **any** non-trivial change (new feature, new endpoint, schema, auth, LLM path, or multi-file work), treat the prompts under `.agents/agents/` as **binding context**:
+
+1. **Plan like architect** — Before coding, read `.agents/agents/architect.md` and produce a short plan: schema/API impact, files touched, dependencies, risks. If requirements are ambiguous, ask **one** clarifying question instead of guessing.
+2. **Implement with the right role** — Backend: `.agents/agents/backend-agent.md`. Frontend: `.agents/agents/ui-agent.md`. LLM/RAG/prompts: `.agents/agents/ai-rag-agent.md`. Stay within that role’s conventions; do not expand scope.
+3. **Review like security** — Before treating work as done for merge-worthy features, mentally (or explicitly) run checks from `.agents/agents/security-agent.md` for anything touching routes, SQL, LLM input, or secrets.
+4. **Verify like QA** — Match expectations in `.agents/agents/qa-agent.md` for tests and scoping; use skills under `.agents/skills/` (e.g. `postgres`, `owasp-security`, `webapp-testing`, `job-assistant-pipeline`) when they apply.
+
+**Anti-hallucination:** Read the codebase (search/read tools) before asserting symbols, routes, or env vars exist. Prefer citing real paths over invented APIs.
+
+**Scope:** Minimal diff that satisfies the request; no drive-by refactors or extra features; no new dependencies without clear need. Avoid over- and under-engineering: not more abstraction than the repo already uses; not skipping auth, migrations, or tests when the change warrants them.
+
+**Trivial edits** (typos, single obvious bugfixes in one file) may skip a full architect plan but must still match `AGENTS.md` conventions for that area.
+
+Full project context: root `AGENTS.md`.
