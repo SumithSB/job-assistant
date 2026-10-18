@@ -7,23 +7,44 @@ import trafilatura
 MAX_RESPONSE_BYTES = 2_000_000
 
 
+def _is_disallowed_ip(ip: ipaddress.IPv4Address | ipaddress.IPv6Address) -> bool:
+    """True when the address is not a publicly routable unicast target.
+
+    IPv4-mapped IPv6 is classified using the embedded IPv4 address.
+    """
+    if isinstance(ip, ipaddress.IPv6Address) and ip.ipv4_mapped is not None:
+        ip = ip.ipv4_mapped
+    return ip.is_multicast or not ip.is_global
+
+
 def _assert_safe_http_url(url: str) -> None:
+    """Reject non-http(s) URLs and hosts that are not safe to fetch.
+
+    Hostnames that are not IP literals are allowed here. The ValueError from
+    ipaddress.ip_address (meaning "not a literal") must stay separate from the
+    rejection of private, loopback, and link-local addresses. Nesting that
+    rejection inside the same try/except lets those literals through.
+    """
     parsed = urlparse(url)
     if parsed.scheme not in ("http", "https"):
         raise ValueError("Only http and https URLs are allowed")
     host = parsed.hostname
     if host is None:
         raise ValueError("URL missing host")
-    lowered = host.lower()
+    lowered = host.lower().rstrip(".")
     if lowered == "localhost" or lowered.endswith(".localhost"):
         raise ValueError("URL host is not allowed")
     try:
-        ip = ipaddress.ip_address(host)
-        if ip.is_private or ip.is_loopback or ip.is_link_local or ip.is_reserved:
-            raise ValueError("URL resolves to a disallowed network")
+        ip = ipaddress.ip_address(lowered)
     except ValueError:
-        # not an IP literal — hostname OK for now
-        pass
+        return
+    if _is_disallowed_ip(ip):
+        raise ValueError("URL host is not allowed")
+
+
+async def _guard_outbound_request(request: httpx.Request) -> None:
+    """Re-check each hop, including redirects, before the request is sent."""
+    _assert_safe_http_url(str(request.url))
 
 
 async def fetch_url_text(url: str) -> tuple[str, str | None, str]:
@@ -33,6 +54,7 @@ async def fetch_url_text(url: str) -> tuple[str, str | None, str]:
         follow_redirects=True,
         timeout=httpx.Timeout(15.0),
         limits=httpx.Limits(max_connections=5),
+        event_hooks={"request": [_guard_outbound_request]},
     ) as client:
         response = await client.get(url, headers={"User-Agent": "JobAssistantBot/0.1"})
         response.raise_for_status()
