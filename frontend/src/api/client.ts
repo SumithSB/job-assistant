@@ -1,4 +1,6 @@
 import type { ApiErrorBody } from "./types";
+import { shouldClearSession } from "./session";
+import { useAuthStore } from "@/store/authStore";
 
 const base = (import.meta.env.VITE_API_URL || "http://127.0.0.1:8000").replace(/\/$/, "");
 
@@ -19,16 +21,20 @@ export class ApiError extends Error {
 
 export async function apiRequest<T>(path: string, init?: RequestInit): Promise<T> {
   const token = getToken();
+  const sentAuthorization = Boolean(token);
   const res = await fetch(`${base}${path}`, {
     ...init,
     headers: {
       "Content-Type": "application/json",
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...(sentAuthorization ? { Authorization: `Bearer ${token}` } : {}),
       ...init?.headers,
     },
   });
 
   if (!res.ok) {
+    if (shouldClearSession(res.status, sentAuthorization, path)) {
+      useAuthStore.getState().setToken(null);
+    }
     let msg = res.statusText;
     let duplicateJobId: string | undefined;
     try {
