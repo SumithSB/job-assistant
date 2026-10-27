@@ -4,13 +4,13 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { api, ApiError } from "@/api/client";
 import { AppShell } from "@/components/layout/AppShell";
 import { AuthenticatedNav } from "@/components/layout/AuthenticatedNav";
+import { fitOverallScore } from "@/components/job/jobDetailParse";
 import {
   FitAssessmentSection,
   PostingOverviewSection,
   RawPostingCollapse,
   ResumeVariantSection,
   RoadmapSection,
-  fitOverallScore,
 } from "@/components/job/jobDetailViews";
 
 const TRACK_PRESETS = ["wishlist", "applied", "phone_screen", "interview"] as const;

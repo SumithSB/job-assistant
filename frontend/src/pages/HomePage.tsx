@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { api, ApiError } from "@/api/client";
 import type { ApplicationRow, JobDetail } from "@/api/types";
-import { fitOverallScore, parseRoadmapPlan } from "@/components/job/jobDetailViews";
+import { fitOverallScore, getExtractionSummary, parseRoadmapPlan } from "@/components/job/jobDetailParse";
 import { AppShell } from "@/components/layout/AppShell";
 import { useAuthStore } from "@/store/authStore";
 
@@ -30,13 +30,6 @@ function jobHasInsights(job: JobDetail): boolean {
   if (fitOverallScore(job.fit_assessment) != null) return true;
   const p = parseRoadmapPlan(job.roadmap?.plan ?? null);
   return Boolean(p && (p.skills.length || p.interviewPrep.length || p.risks.length));
-}
-
-function getExtractionSummary(job: JobDetail): string | null {
-  const e = job.extracted;
-  if (!e || typeof e !== "object") return null;
-  const s = (e as { summary?: unknown }).summary;
-  return typeof s === "string" && s.trim() ? s.slice(0, 280) + (s.length > 280 ? "…" : "") : null;
 }
 
 function statusLabel(s: string): string {
