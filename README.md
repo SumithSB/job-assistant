@@ -5,7 +5,7 @@ AI-powered job search companion: ingest postings, explainable fit vs your profil
 ## Local-first runbook
 
 1. **Postgres:** `docker compose up -d` from repo root (see `docker-compose.yml`).
-2. **Env:** Copy `env.example` → `backend/.env` (or copy `backend/.env.example`). Optionally copy `frontend/env.example` → `frontend/.env`. Set `DATABASE_URL`, `JWT_SECRET`, and `LLM_PROVIDER` (`mock` needs no network; `chat` uses OpenAI-compatible HTTP — e.g. Ollama locally or a cloud endpoint; see `env.example`).
+2. **Env:** Copy `env.example` → `backend/.env`. Optionally copy `frontend/env.example` → `frontend/.env`. `DATABASE_URL` in the example matches Compose (`jobtracker` / `jobtracker` on `localhost:5432`). Set `JWT_SECRET` and `LLM_PROVIDER` (`mock` needs no network; `chat` uses OpenAI-compatible HTTP — e.g. Ollama locally or a cloud endpoint; see `env.example`).
 3. **One terminal (API + Vite):** from repo root, after `cd backend && uv sync && uv run alembic upgrade head` and `cd frontend && npm install` once: `make dev`
 4. **Or two terminals:** Backend — `cd backend && uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000`. Frontend — `cd frontend && npm run dev`. Open the Vite URL; `VITE_API_URL` should point at the API (default `http://localhost:8000`).
 

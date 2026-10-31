@@ -6,7 +6,7 @@ Backend reads **`python-dotenv`** from `backend/.env` (or process env in product
 
 | Variable | Required | Description |
 |----------|----------|-------------|
-| `DATABASE_URL` | Yes | `postgresql+asyncpg://user:pass@host:5432/dbname` |
+| `DATABASE_URL` | Yes | `postgresql+asyncpg://user:pass@host:5432/dbname`. Local Compose (`docker-compose.yml`) is `postgresql+asyncpg://jobtracker:jobtracker@localhost:5432/jobtracker`. |
 | `JWT_SECRET` | Yes (non-mock) | HS256 secret for access tokens (local auth). |
 | `JWT_EXPIRE_HOURS` | No | Default `24`. |
 | `CORS_ORIGINS` | No | Comma-separated origins; default `http://localhost:5173`. |
