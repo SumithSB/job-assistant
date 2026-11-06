@@ -7,7 +7,9 @@ AI-powered job search companion: ingest postings, explainable fit vs your profil
 1. **Postgres:** `docker compose up -d` from repo root (see `docker-compose.yml`).
 2. **Env:** Copy `env.example` → `backend/.env`. Optionally copy `frontend/env.example` → `frontend/.env`. `DATABASE_URL` in the example matches Compose (`jobtracker` / `jobtracker` on `localhost:5432`). Set `JWT_SECRET` and `LLM_PROVIDER` (`mock` needs no network; `chat` uses OpenAI-compatible HTTP — e.g. Ollama locally or a cloud endpoint; see `env.example`).
 3. **One terminal (API + Vite):** from repo root, after `cd backend && uv sync && uv run alembic upgrade head` and `cd frontend && npm install` once: `make dev`
-4. **Or two terminals:** Backend — `cd backend && uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000`. Frontend — `cd frontend && npm run dev`. Open the Vite URL; `VITE_API_URL` should point at the API (default `http://localhost:8000`).
+4. **Or two terminals:** Backend — `cd backend && uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000`. Frontend — `cd frontend && npm run dev`. Open the Vite URL (`http://localhost:5173`); `VITE_API_URL` should point at the API (default `http://localhost:8000`).
+
+Signed-in pages: `/` (home: overview, profile, analyze, library), `/applications`, `/jobs/:id`. Public pages: `/login`, `/register`. Any other path redirects to `/`.
 
 Optional **cloud** profile later: deploy SPA (e.g. Vercel), API on a Python host, `DATABASE_URL` to managed Postgres, `AUTH_MODE=supabase` with JWKS validation — see [`docs/env-contracts.md`](docs/env-contracts.md).
 
@@ -47,11 +49,25 @@ Contact, Document, Interview → as extended in later milestones
 - **D:** Chat / RAG.
 - **E:** Discovery (policy-gated).
 
+## Tests
+
+Backend unit tests do not need a running database:
+
+```bash
+cd backend && uv run pytest tests/ -q
+```
+
+Frontend tests use Node's built-in test runner (`node --test` in `frontend/package.json`):
+
+```bash
+cd frontend && npm test
+```
+
 ## Project layout
 
 ```
 backend/app/     api/v1/, core/, db/, models/, schemas/, services/
-frontend/src/    api/, pages/, components/, hooks/, store/
+frontend/src/    api/, components/, pages/, store/
 docs/            embedding-strategy.md, env-contracts.md
 ```
 

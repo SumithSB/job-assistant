@@ -6,18 +6,15 @@ React 18 + TypeScript + Tailwind CSS + Vite + Zustand + react-query.
 
 ```
 src/
-  api/         # apiClient wrapper + TypeScript types
+  api/         # `api` wrapper (`client.ts`) + TypeScript types
   components/  # Reusable UI components
-  pages/       # Route-level page components (/dashboard, /jobs, /applications, /analytics)
-  hooks/       # Custom React hooks (data fetching, business logic)
+  pages/       # `/`, `/applications`, `/jobs/:id`, `/login`, `/register`
   store/       # Zustand global state
-tests/
-  e2e/         # Playwright specs, POMs, fixtures
 ```
 
 ## Conventions
 
-- No raw `fetch` — all API calls via `apiClient`
+- No raw `fetch` in pages — all API calls via `api` in `src/api/client.ts`
 - No `any` types — every API response typed in `api/types.ts`
 - Mutations through Zustand store actions, not local `useState`
 - Data fetching via react-query `useQuery` / `useMutation` hooks
@@ -28,9 +25,8 @@ tests/
 ```bash
 npm run dev       # dev server (http://localhost:5173)
 npm run build     # production build
-npm run test      # vitest unit tests
+npm run test      # node --test (session + job detail parsers)
 npx tsc --noEmit  # type check
-npx playwright test  # E2E tests
 ```
 
 ## Active skills

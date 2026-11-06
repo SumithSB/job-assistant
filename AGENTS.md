@@ -9,7 +9,7 @@ An AI-powered job application tracker. Users manage their job search pipeline �
 - **Frontend**: React 18 + TypeScript, Tailwind CSS, Vite
 - **AI**: LLM API for generation and structured extraction; pgvector 1536-dim embeddings (provider-agnostic — wire your SDK of choice)
 - **Integrations**: Gmail MCP (email tracking), Google Calendar MCP (interview scheduling)
-- **Testing**: Playwright (E2E), pytest + httpx (backend)
+- **Testing**: pytest (backend), Node's built-in test runner via `npm test` in `frontend/`
 - **Infrastructure**: Docker Compose (local), AWS ECS (prod)
 
 ## Domain Model
@@ -66,12 +66,12 @@ Cursor and other hosts: workspace rules `.cursor/rules/development-lifecycle.mdc
 - All API endpoints require JWT Bearer auth except `GET /health` and `POST /auth/*`
 - Route prefix: `/api/v1/`
 - pgvector (when enabled): `embedding vector(D)` on `jobs`; dimension `D` matches chosen embedding model; IVFFlat index, 100 lists
-- Frontend routes: `/dashboard`, `/jobs`, `/applications`, `/analytics`, `/settings`
+- Frontend routes: `/` (home), `/applications`, `/jobs/:id`; public `/login` and `/register`. Unknown paths redirect to `/`
 - Python env vars via `python-dotenv`; never hardcode secrets
 - Database migrations via Alembic — always generate versioned migration files, never raw `ALTER TABLE`
 - All async SQLAlchemy sessions use `AsyncSession` with `expire_on_commit=False`
 - Error responses: `{"error": "message", "detail": "..."}` shape, consistent across all endpoints
-- Frontend API calls use a typed `apiClient` wrapper — never raw `fetch`
+- Frontend API calls use the typed `api` wrapper in `frontend/src/api/client.ts` — never raw `fetch` from pages
 
 ## Project structure
 
@@ -87,9 +87,8 @@ backend/
 frontend/
   src/
     components/      # Reusable UI components
-    pages/           # Route-level page components
-    hooks/           # Custom React hooks
-    api/             # apiClient + typed endpoints
+    pages/           # Home, Applications, Job detail, Login, Register
+    api/             # `api` wrapper + typed endpoints
     store/           # Global state (Zustand)
 .agents/
   agents/            # Role system prompts (orchestrator, backend, UI, …)
