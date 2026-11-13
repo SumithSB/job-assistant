@@ -7,8 +7,17 @@ import {
   parseFitDimensions,
   parseGaps,
   parseRoadmapPlan,
+  pickStrArray,
   postingMeta,
 } from "./jobDetailParse.ts";
+
+describe("pickStrArray", () => {
+  it("trims entries and drops blanks and non-strings", () => {
+    assert.deepEqual(pickStrArray([" Python ", "  ", "", 1, null, "SQL"]), ["Python", "SQL"]);
+    assert.deepEqual(pickStrArray("nope"), []);
+    assert.deepEqual(pickStrArray(undefined), []);
+  });
+});
 
 describe("fitOverallScore", () => {
   it("returns a finite overall score, including zero", () => {

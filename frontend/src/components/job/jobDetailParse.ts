@@ -7,7 +7,13 @@ function pickStr(v: unknown): string | null {
 
 export function pickStrArray(v: unknown): string[] {
   if (!Array.isArray(v)) return [];
-  return v.filter((x): x is string => typeof x === "string" && x.trim().length > 0);
+  const out: string[] = [];
+  for (const x of v) {
+    if (typeof x !== "string") continue;
+    const t = x.trim();
+    if (t) out.push(t);
+  }
+  return out;
 }
 
 function pickRecord(v: unknown): Record<string, unknown> | null {
