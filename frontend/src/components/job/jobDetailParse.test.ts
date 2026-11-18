@@ -33,6 +33,12 @@ describe("fitOverallScore", () => {
     assert.equal(fitOverallScore({ overall_score: Number.NaN }), null);
     assert.equal(fitOverallScore({ overall_score: Number.POSITIVE_INFINITY }), null);
   });
+
+  it("clamps finite scores onto the 0-100 bar scale", () => {
+    assert.equal(fitOverallScore({ overall_score: 140 }), 100);
+    assert.equal(fitOverallScore({ overall_score: -8 }), 0);
+    assert.equal(fitOverallScore({ overall_score: 72.5 }), 72.5);
+  });
 });
 
 describe("parseFitDimensions", () => {
@@ -78,6 +84,21 @@ describe("parseFitDimensions", () => {
     assert.equal(dims[1]?.score, 0);
     assert.deepEqual(parseFitDimensions(null), []);
     assert.deepEqual(parseFitDimensions({ dimensions: "nope" }), []);
+  });
+
+  it("treats non-finite scores as zero and clamps weights to 0-1", () => {
+    const dims = parseFitDimensions({
+      dimensions: [
+        { id: "bad", label: "Bad", score: Number.NaN, weight: Number.POSITIVE_INFINITY },
+        { id: "heavy", label: "Heavy", score: 40, weight: 2.5 },
+        { id: "neg", label: "Neg", score: 10, weight: -0.2 },
+      ],
+    });
+    assert.equal(dims[0]?.score, 0);
+    assert.equal(dims[0]?.weight, 0);
+    assert.equal(dims[1]?.score, 40);
+    assert.equal(dims[1]?.weight, 1);
+    assert.equal(dims[2]?.weight, 0);
   });
 });
 

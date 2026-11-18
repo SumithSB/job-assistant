@@ -21,10 +21,21 @@ function pickRecord(v: unknown): Record<string, unknown> | null {
   return v as Record<string, unknown>;
 }
 
+/** Scores are 0-100. Non-finite values are not scores. */
+function clampScore(n: unknown): number | null {
+  if (typeof n !== "number" || !Number.isFinite(n)) return null;
+  return Math.min(100, Math.max(0, n));
+}
+
+/** Dimension weights are fractions of 1. Non-finite values count as unset. */
+function clampWeight(n: unknown): number {
+  if (typeof n !== "number" || !Number.isFinite(n)) return 0;
+  return Math.min(1, Math.max(0, n));
+}
+
 export function fitOverallScore(fit: Record<string, unknown> | null | undefined): number | null {
   if (!fit) return null;
-  const s = fit.overall_score;
-  return typeof s === "number" && Number.isFinite(s) ? s : null;
+  return clampScore(fit.overall_score);
 }
 
 export type ParsedFitDimension = {
@@ -44,8 +55,8 @@ export function parseFitDimensions(fit: Record<string, unknown> | null | undefin
     if (!o) continue;
     const label = pickStr(o.label) ?? pickStr(o.id) ?? "Dimension";
     const id = pickStr(o.id) ?? label;
-    const score = typeof o.score === "number" ? Math.min(100, Math.max(0, o.score)) : 0;
-    const weight = typeof o.weight === "number" ? o.weight : 0;
+    const score = clampScore(o.score) ?? 0;
+    const weight = clampWeight(o.weight);
     out.push({ id, label, score, weight, evidence: pickStrArray(o.evidence) });
   }
   return out;
