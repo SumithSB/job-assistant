@@ -25,7 +25,7 @@ src/
 ```bash
 npm run dev       # dev server (http://localhost:5173)
 npm run build     # production build
-npm run test      # node --test (session + job detail parsers)
+npm run test      # node --test (API errors, session, job detail parsers)
 npx tsc --noEmit  # type check
 ```
 

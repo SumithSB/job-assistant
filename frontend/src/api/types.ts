@@ -1,8 +1,3 @@
-export type ApiErrorBody = {
-  error: string;
-  detail: string | unknown;
-};
-
 export interface TokenResponse {
   access_token: string;
   token_type: string;

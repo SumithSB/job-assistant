@@ -1,6 +1,6 @@
-import type { ApiErrorBody } from "./types";
-import { shouldClearSession } from "./session";
 import { useAuthStore } from "@/store/authStore";
+import { parseApiErrorBody } from "./errors";
+import { shouldClearSession } from "./session";
 
 const base = (import.meta.env.VITE_API_URL || "http://127.0.0.1:8000").replace(/\/$/, "");
 
@@ -35,25 +35,16 @@ export async function apiRequest<T>(path: string, init?: RequestInit): Promise<T
     if (shouldClearSession(res.status, sentAuthorization, path)) {
       useAuthStore.getState().setToken(null);
     }
-    let msg = res.statusText;
+    let message = res.statusText;
     let duplicateJobId: string | undefined;
     try {
-      const body = (await res.json()) as ApiErrorBody;
-      const d = body.detail;
-      if (typeof d === "string") {
-        msg = d;
-      } else if (d && typeof d === "object" && !Array.isArray(d)) {
-        const o = d as Record<string, unknown>;
-        if (typeof o.message === "string") msg = o.message;
-        else if (typeof o.error === "string") msg = String(o.error);
-        if (typeof o.job_id === "string") duplicateJobId = o.job_id;
-      } else if (body.error) {
-        msg = String(body.error);
-      }
+      const parsed = parseApiErrorBody(await res.json(), res.statusText);
+      message = parsed.message;
+      duplicateJobId = parsed.duplicateJobId;
     } catch {
       /* ignore */
     }
-    throw new ApiError(res.status, msg, duplicateJobId);
+    throw new ApiError(res.status, message, duplicateJobId);
   }
 
   if (res.status === 204) return undefined as T;
